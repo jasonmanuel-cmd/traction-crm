@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String     @id @default(cuid())
+  name          String
+  email         String     @unique
+  password      String
+  businessName  String     @default("")
+  website       String     @default("")
+  phone         String     @default("")
+  industry      String     @default("")
+  openaiKey     String     @default("")
+  sendgridKey   String     @default("")
+  plan          String     @default("free") // free, starter, pro, agency
+  leadsLimit    Int        @default(100)
+  emailsLimit   Int        @default(500)
+  trialStartAt  DateTime?
+  trialEndAt    DateTime?
+  upgradedAt    DateTime?
+  createdAt     DateTime   @default(now())
+  campaigns     Campaign[]
+  leads         Lead[]
+  activities    Activity[]
+}
+
+model Campaign {
+  id        String     @id @default(cuid())
+  name      String
+  status    String     @default("draft")
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  leads     Lead[]
+  activities Activity[]
+  createdAt DateTime   @default(now())
+}
+
+model Lead {
+  id         String     @id @default(cuid())
+  name       String
+  company    String
+  title      String     @default("")
+  email      String     @default("")
+  phone      String     @default("")
+  status     String     @default("new")
+  score      Int        @default(50)
+  source     String     @default("manual")
+  generatedContent String @default("")
+  meetingDate String     @default("")
+  meetingTime String     @default("")
+  meetingUrl  String    @default("")
+  campaignId String
+  campaign   Campaign   @relation(fields: [campaignId], references: [id])
+  userId     String
+  user       User       @relation(fields: [userId], references: [id])
+  activities Activity[]
+  createdAt  DateTime   @default(now())
+}
+
+model Activity {
+  id         String   @id @default(cuid())
+  action     String
+  type       String   @default("email")
+  leadId     String?
+  lead       Lead?    @relation(fields: [leadId], references: [id])
+  campaignId String?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id])
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+}
