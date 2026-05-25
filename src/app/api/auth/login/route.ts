@@ -4,9 +4,17 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signToken, COOKIE_OPTIONS } from "@/lib/auth";
+import { rateLimitCheck } from "@/lib/rate-limiter";
 
 export async function POST(req: Request) {
   try {
+    // Rate limiting by IP
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const { allowed, remaining } = rateLimitCheck(ip);
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many attempts. Please try again in 15 minutes." }, { status: 429 });
+    }
+
     const { email, password } = await req.json();
 
     const user = await prisma.user.findUnique({ where: { email } });

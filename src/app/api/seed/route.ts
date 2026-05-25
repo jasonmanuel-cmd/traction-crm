@@ -4,7 +4,18 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
-export async function POST() {
+export async function POST(req: Request) {
+  // Block seed endpoint in production
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  // In non-production, require an admin secret
+  const adminSecret = req.headers.get("x-admin-secret");
+  if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const existing = await prisma.user.findUnique({ where: { email: "demo@traction.ai" } });
   if (existing) {
     await prisma.activity.deleteMany({ where: { userId: existing.id } });

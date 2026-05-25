@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, Prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 
 export async function GET(req: Request) {
@@ -11,7 +11,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const campaignId = searchParams.get("campaignId");
 
-  const where: any = { userId: payload.userId };
+  const where: Prisma.LeadWhereInput = { userId: payload.userId };
   if (campaignId) where.campaignId = campaignId;
 
   const leads = await prisma.lead.findMany({

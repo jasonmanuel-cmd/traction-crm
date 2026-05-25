@@ -1,5 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
+import type { Prisma } from "@prisma/client";
+
+export { Prisma };
 
 const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL || "file:./dev.db",
